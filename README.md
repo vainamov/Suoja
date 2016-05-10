@@ -16,8 +16,8 @@ When Drag & Drop multiple files into the form, there are several options to choo
 
 |Option|Behaviour|
 |---|---|
-|`Compression`|Compresses all files in an encrypted archive.|
-|`Individual`|Allows to select all options for each file itself.|
+|`Compression (Encryption only)`|Compresses all files in an encrypted archive.|
+|`Individual (Standard)`|Allows to select all options for each file itself.|
 |`Equal`|Allows to select all options once (like a template) which will then get applied to all files.|
 
 ### Filename Encoding
@@ -25,8 +25,8 @@ There are two options to choose from on how to handle the filename.
 
 |Option|Behaviour|
 |---|---|
-|`Keep`|The filename stays the same and Suoja only adds an `.suoja` to it. Makes it easier to remember which file is which.|
-|`Encode`|The filename is being encoded and than Suoja adds the `.suoja`. Makes it harder to remember which file is which but will increase safety as it prevents conclusion to the orignial filename. When importing a file with an encoded name Suoja will automatically display it's original name.|
+|`Keep (Standard)`|The filename stays the same and Suoja only adds an `.suoja` to it. Makes it easier to remember which file is which.|
+|`Encode (Recommended)`|The filename is being encoded and than Suoja adds the `.suoja`. Makes it harder to remember which file is which but will increase safety as it prevents conclusion to the orignial filename. When importing a file with an encoded name Suoja will automatically display it's original name.|
 
 ### License and Redistributation Details
 Suoja and all it's components are licensed according to the [Creative Commons CC BY-NC-SA 4.0 License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
