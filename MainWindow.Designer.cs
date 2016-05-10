@@ -73,6 +73,7 @@
             this.lvwJobs.SelectedIndexChanged += new System.EventHandler(this.lvwJobs_SelectedIndexChanged);
             this.lvwJobs.DragDrop += new System.Windows.Forms.DragEventHandler(this.lvwJobs_DragDrop);
             this.lvwJobs.DragEnter += new System.Windows.Forms.DragEventHandler(this.lvwJobs_DragEnter);
+            this.lvwJobs.DoubleClick += new System.EventHandler(this.lvwJobs_DoubleClick);
             // 
             // columnHeader1
             // 

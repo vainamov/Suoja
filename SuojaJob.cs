@@ -1,7 +1,14 @@
 ﻿namespace Suoja
 {
-    class SuojaJob
+    public class SuojaJob
     {
+        public enum JobStatus
+        {
+            Queued,
+            Finished,
+            Failed
+        }
+
         /// <summary>
         /// Path of the Input file.
         /// </summary>
@@ -30,6 +37,14 @@
         /// Whether this job is completed or not.
         /// </summary>
         public bool Done { get; set; }
+        /// <summary>
+        /// The status of this job.
+        /// </summary>
+        public JobStatus Status { get; set; }
+        /// <summary>
+        /// Additional information to this job.
+        /// </summary>
+        public string Message { get; set; }
 
         /// <summary>
         /// Initializes a new SuojaJob that stores all important values.

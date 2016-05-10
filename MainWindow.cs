@@ -33,6 +33,7 @@ namespace Suoja
         private void addJob(string filepath, string keypath, AddJobDialog.JobAction action, AddJobDialog.KeySource source, FilenameOptionDialog.Filenameoption option)
         {
             SuojaJob job = new SuojaJob(filepath, keypath, action, source, option); //Initialize a new job
+            job.Status = SuojaJob.JobStatus.Queued;
             Jobs.Add(job); //Add the job
             ListViewItem lvi = new ListViewItem(); //Create a new ListViewItem
             lvi.Group = lvwJobs.Groups[0]; //Group set to "waiting"
@@ -68,6 +69,8 @@ namespace Suoja
                 lvwJobs.Items.Remove(lvwJobs.SelectedItems[0]); //Remove the ListViewItem
             }
 
+            btnStartAll.Enabled = lvwJobs.Groups[0].Items.Count > 0;
+
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -81,10 +84,12 @@ namespace Suoja
                         if (startJob(job)) //If the job went flawlessly
                         {
                             lvi.Group = lvwJobs.Groups[1]; //Set the group to "Finished"
+                            job.Status = SuojaJob.JobStatus.Finished;
                         }
                         else
                         {
                             lvi.Group = lvwJobs.Groups[2]; //Otherwise to "Error"
+                            job.Status = SuojaJob.JobStatus.Failed;
                         }
                     }
                 }
@@ -129,6 +134,14 @@ namespace Suoja
                 bool result = Provider.Encrypt(job.Filepath, outputPath); //Store the jobs result
                 File.Delete(outputPath + ".data");
                 File.Delete(outputPath + ".hmac");
+                if(result)
+                {
+                    job.Status = SuojaJob.JobStatus.Finished;
+                }
+                else
+                {
+                    job.Status = SuojaJob.JobStatus.Failed;
+                }
                 job.Done = result; //Set the result
                 return result; //Return it
             }
@@ -149,6 +162,14 @@ namespace Suoja
                 bool result = Provider.Decrypt(job.Filepath, outputPath); //Store the jobs result
                 File.Delete(job.Filepath + ".data");
                 File.Delete(job.Filepath + ".hmac");
+                if (result)
+                {
+                    job.Status = SuojaJob.JobStatus.Finished;
+                }
+                else
+                {
+                    job.Status = SuojaJob.JobStatus.Failed;
+                }
                 job.Done = result; //Set the result
                 return result; //Return it
             }
@@ -206,10 +227,10 @@ namespace Suoja
                 if (Method == DragDropDialog.HandleMethod.Compress) //If the user chose to compress the files
                 {
                     string[] files = new string[data.GetFileDropList().Count]; //Copy the filepaths to a string array
-                    data.GetFileDropList().CopyTo(files, 0); 
+                    data.GetFileDropList().CopyTo(files, 0);
                     SaveFileDialog sfd = new SaveFileDialog(); //Show a new SafeFileDialog
                     sfd.Filter = "Archiv (*.zip)|*.zip"; //Only allow ".zip" as extension
-                    sfd.Title = "Archiv speichern unter..."; 
+                    sfd.Title = "Archiv speichern unter...";
                     if (sfd.ShowDialog() == DialogResult.OK) //If the user hit "OK"
                     {
                         AddJobDialog ajd = new AddJobDialog(); //Show a new AddJobDialog
@@ -220,9 +241,9 @@ namespace Suoja
                             SuojaCompression.Compress(files, sfd.FileName); //Compress the files and create the archive
                             addJob(sfd.FileName, ajd.Keypath, ajd.Action, ajd.Source, ajd.Option); //Add a new Job with the corresponding data
                             startJob(Jobs.Last()); //Immediately start the job
-                            foreach(ListViewItem lvi in lvwJobs.Items)
+                            foreach (ListViewItem lvi in lvwJobs.Items)
                             {
-                                if (lvi.Text == sfd.FileName) 
+                                if (lvi.Text == sfd.FileName)
                                 {
                                     lvi.Group = lvwJobs.Groups[1]; //Set the group to "Finished"
                                 }
@@ -287,6 +308,61 @@ namespace Suoja
             AboutDialog ad = new AboutDialog();
             ad.ShowDialog();
             ad.Dispose();
+        }
+
+        private void lvwJobs_DoubleClick(object sender, EventArgs e)
+        {
+            if (lvwJobs.SelectedItems.Count > 0)
+            {
+                foreach (SuojaJob job in Jobs)
+                {
+                    if (job.Filepath == lvwJobs.SelectedItems[0].Text)
+                    {
+                        JobDetails jd = new JobDetails();
+                        jd.OriginalFilepath = job.Filepath;
+                        jd.KeyFilepath = job.Keypath;
+                        jd.Status = job.Status;
+                        jd.Action = job.Action;
+                        string path = job.Filepath.Substring(0, job.Filepath.Length - job.Filepath.Split('\\').Last().Length); //Otherwise split the Filepath into path and filename
+                        if (job.Action == AddJobDialog.JobAction.Decrypt)
+                        {
+                            if (job.Filepath.Split('\\').Last().Split('.').Length == 2) //If the filename contains only 1 dot (.) it is a Base64-encoded string
+                            {
+                                jd.OutputFilepath = Path.Combine(path, Encoding.Default.GetString(Convert.FromBase64String(job.Filepath.Split('\\').Last().Remove(job.Filepath.Split('\\').Last().Length - 6, 6)))); //Therefore remove the ".suoja", decode the filename from Base64 and combine the result with the existing path
+                            }
+                            else
+                            {
+                                jd.OutputFilepath = job.Filepath.Remove(job.Filepath.Length - 6, 6); //Otherwise just remove the ".suoja"
+                            }
+                        }
+                        else
+                        {
+                            if (job.Option == FilenameOptionDialog.Filenameoption.Keep) //If the Filenameoption is set to "Keep"
+                            {
+                                jd.OutputFilepath = job.Filepath + ".suoja"; //Just add ".suoja"
+                            }
+                            else
+                            {
+                                jd.OutputFilepath = Path.Combine(path, Convert.ToBase64String(Encoding.Default.GetBytes(job.Filepath.Split('\\').Last())) + ".suoja"); //Encode the filename in Base64, add ".suoja" and combine the new filename with the existing path
+                            }
+                        }
+                        jd.Option = job.Option;
+                        jd.Message = job.Message;
+                        if (jd.ShowDialog()==DialogResult.OK)
+                        {
+                            if (startJob(job)) //If the job went flawlessly
+                            {
+                                lvwJobs.SelectedItems[0].Group = lvwJobs.Groups[1]; //Set the group to "Finished"
+                            }
+                            else
+                            {
+                                lvwJobs.SelectedItems[0].Group = lvwJobs.Groups[2]; //Otherwise to "Error"
+                            }
+                        }
+                        jd.Dispose();
+                    }
+                }
+            }
         }
     }
 }
