@@ -1,8 +1,8 @@
 # Suoja
 File Encryption Tool made for the IT-Talents Code Competition 04/2016
 
-### Important Notice!
-This repository is not made for reproduction as the directory structure is adjusted.
+### Important Notice
+This repository is not made for reproduction as the directory structure is adjusted!
 
 ### Features
 * Encrypt any file using strong Rijndael-256 algorithm.
@@ -26,7 +26,7 @@ There are two options to choose from on how to handle the filename.
 |Option|Behaviour|
 |---|---|
 |`Keep (Standard)`|The filename stays the same and Suoja only adds an `.suoja` to it. Makes it easier to remember which file is which.|
-|`Encode (Recommended)`|The filename is being encoded and than Suoja adds the `.suoja`. Makes it harder to remember which file is which but will increase safety as it prevents conclusion to the orignial filename. When importing a file with an encoded name Suoja will automatically display it's original name.|
+|`Encode (Recommended)`|The filename is being encoded and then Suoja adds the `.suoja`. Makes it harder to remember which file is which but will increase safety as it prevents conclusion to the orignial filename. When importing a file with an encoded name Suoja will automatically display it's original name.|
 
 ### License and Redistributation Details
 Suoja and all it's components are licensed according to the [Creative Commons CC BY-NC-SA 4.0 License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
