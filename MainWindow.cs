@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using System.IO;
+using System.Threading;
 
 namespace Suoja
 {
@@ -15,6 +16,19 @@ namespace Suoja
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        public MainWindow(string path)
+        {
+            InitializeComponent();
+            AddJobDialog ajd = new AddJobDialog(); //Show a new AddJobDialog
+            ajd.Filepath = path; //But already set the path
+            ajd.AllowBrowsing = false; //Disallow browsing for files
+            if (ajd.ShowDialog() == DialogResult.OK)
+            {
+                addJob(ajd.Filepath, ajd.Keypath, ajd.Action, ajd.Source, ajd.Option); //Add the corresponding job
+            }
+            ajd.Dispose(); //Cleanup
         }
 
         private SuojaProvider Provider = new SuojaProvider(); //SuojaProvider for all en-/decryption jobs
@@ -131,10 +145,18 @@ namespace Suoja
                     outputPath = Path.Combine(path, Convert.ToBase64String(Encoding.Default.GetBytes(job.Filepath.Split('\\').Last())) + ".suoja"); //Encode the filename in Base64, add ".suoja" and combine the new filename with the existing path
                 }
                 job.OutputPath = outputPath; //Set the Output path
-                bool result = Provider.Encrypt(job.Filepath, outputPath); //Store the jobs result
+
+                JobRunningPopup jrp = new JobRunningPopup();
+                new Thread(delegate ()
+                {
+                    jrp.ShowDialog();
+                }).Start();
+
+                bool result = Provider.Encrypt(job.Filepath, outputPath);
                 File.Delete(outputPath + ".data");
                 File.Delete(outputPath + ".hmac");
-                if(result)
+
+                if (result)
                 {
                     job.Status = SuojaJob.JobStatus.Finished;
                 }
@@ -142,6 +164,7 @@ namespace Suoja
                 {
                     job.Status = SuojaJob.JobStatus.Failed;
                 }
+                jrp.Invoke(new EventHandler(delegate { jrp.Close(); }));
                 job.Done = result; //Set the result
                 return result; //Return it
             }
@@ -159,6 +182,13 @@ namespace Suoja
                 {
                     outputPath = job.Filepath.Remove(job.Filepath.Length - 6, 6); //Otherwise just remove the ".suoja"
                 }
+
+                JobRunningPopup jrp = new JobRunningPopup();
+                new Thread(delegate ()
+                {
+                    jrp.ShowDialog();
+                }).Start();
+                
                 bool result = Provider.Decrypt(job.Filepath, outputPath); //Store the jobs result
                 File.Delete(job.Filepath + ".data");
                 File.Delete(job.Filepath + ".hmac");
@@ -170,6 +200,8 @@ namespace Suoja
                 {
                     job.Status = SuojaJob.JobStatus.Failed;
                 }
+
+                jrp.Invoke(new EventHandler(delegate { jrp.Close(); }));
                 job.Done = result; //Set the result
                 return result; //Return it
             }
@@ -348,7 +380,7 @@ namespace Suoja
                         }
                         jd.Option = job.Option;
                         jd.Message = job.Message;
-                        if (jd.ShowDialog()==DialogResult.OK)
+                        if (jd.ShowDialog() == DialogResult.OK)
                         {
                             if (startJob(job)) //If the job went flawlessly
                             {

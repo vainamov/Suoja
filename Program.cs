@@ -13,7 +13,15 @@ namespace Suoja
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainWindow());
+            string[] args = Environment.GetCommandLineArgs(); //Get start-up parameters 
+            if (args.Length > 1) //Check if Suoja has been opened via "File > Open With"
+            {
+                Application.Run(new MainWindow(args[1])); //Instantly show a new "Add Job"-dialogue for the desired file
+            }
+            else
+            {
+                Application.Run(new MainWindow()); //Start normally
+            }
         }
     }
 }

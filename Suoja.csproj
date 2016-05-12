@@ -83,6 +83,12 @@
     <Compile Include="JobDetails.Designer.cs">
       <DependentUpon>JobDetails.cs</DependentUpon>
     </Compile>
+    <Compile Include="JobRunningPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="JobRunningPopup.Designer.cs">
+      <DependentUpon>JobRunningPopup.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -109,6 +115,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="JobDetails.resx">
       <DependentUpon>JobDetails.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="JobRunningPopup.resx">
+      <DependentUpon>JobRunningPopup.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
