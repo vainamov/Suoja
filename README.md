@@ -10,6 +10,7 @@ This repository is not made for reproduction as the directory structure is adjus
 * Encrypted files are signed using HMAC and SHA256 as hash-algorithm.
 * Drag & Drop files into the form to get more en-/decryption options. (See table down below for more details.)
 * Encode filenames to prevent conclusion to the original file.
+* Quick-Add jobs by right-clicking a file > Open With.
 
 ### Multiple-File-Handling Options
 When Drag & Drop multiple files into the form, there are several options to choose from on how to handle the files.
