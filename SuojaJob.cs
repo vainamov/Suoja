@@ -2,12 +2,6 @@
 {
     public class SuojaJob
     {
-        public enum JobStatus
-        {
-            Queued,
-            Finished,
-            Failed
-        }
 
         /// <summary>
         /// Path of the Input file.
@@ -24,15 +18,15 @@
         /// <summary>
         /// Action deciding whether to en- or decrypt.
         /// </summary>
-        public AddJobDialog.JobAction Action { get; set; }
+        public EnumerationTypes.JobAction Action { get; set; }
         /// <summary>
         /// Source determining what Key and IV is used.
         /// </summary>
-        public AddJobDialog.KeySource Source { get; set; }
+        public EnumerationTypes.KeySource Source { get; set; }
         /// <summary>
         /// Option determining how to handle the Output filename.
         /// </summary>
-        public FilenameOptionDialog.Filenameoption Option { get; set; }
+        public EnumerationTypes.FileNameOption Option { get; set; }
         /// <summary>
         /// Whether this job is completed or not.
         /// </summary>
@@ -40,7 +34,7 @@
         /// <summary>
         /// The status of this job.
         /// </summary>
-        public JobStatus Status { get; set; }
+        public EnumerationTypes.JobStatus Status { get; set; }
         /// <summary>
         /// Additional information to this job.
         /// </summary>
@@ -54,7 +48,7 @@
         /// <param name="action">Action deciding whether to en- or decrypt.</param>
         /// <param name="source">Source determining what Key and IV is used.</param>
         /// <param name="option">Option determining how to handle the Output filename.</param>
-        public SuojaJob(string filepath, string keypath, AddJobDialog.JobAction action, AddJobDialog.KeySource source, FilenameOptionDialog.Filenameoption option)
+        public SuojaJob(string filepath, string keypath, EnumerationTypes.JobAction action, EnumerationTypes.KeySource source, EnumerationTypes.FileNameOption option)
         {
             Filepath = filepath;
             Keypath = keypath;

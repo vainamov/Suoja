@@ -9,24 +9,11 @@ namespace Suoja
 {
     public partial class AddJobDialog : Form
     {
-
-        public enum JobAction
-        {
-            Encrypt,
-            Decrypt
-        }
-
-        public enum KeySource
-        {
-            New,
-            File
-        }
-
         public string Filepath { get; set; }
         public string Keypath { get; set; }
-        public JobAction Action { get; set; }
-        public KeySource Source { get; set; }
-        public FilenameOptionDialog.Filenameoption Option { get; set; }
+        public EnumerationTypes.JobAction Action { get; set; }
+        public EnumerationTypes.KeySource Source { get; set; }
+        public EnumerationTypes.FileNameOption Option { get; set; }
 
         public bool AllowBrowsing { get; set; }
         public bool KeyFileOnly { get; set; }
@@ -34,7 +21,7 @@ namespace Suoja
         public AddJobDialog()
         {
             InitializeComponent();
-            Option = FilenameOptionDialog.Filenameoption.Keep;
+            Option = EnumerationTypes.FileNameOption.Keep;
             AllowBrowsing = true;
             KeyFileOnly = false;
         }
@@ -42,7 +29,7 @@ namespace Suoja
         private void btnChooseFile_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            if (Action == JobAction.Decrypt)
+            if (Action == EnumerationTypes.JobAction.Decrypt)
             {
                 ofd.Filter = "Verschlüsselte Dateien (*.suoja)|*.suoja";
             }
@@ -50,12 +37,12 @@ namespace Suoja
             {
                 tbxFilepath.Text = ofd.FileName;
                 Filepath = ofd.FileName;
-                if (Action == JobAction.Decrypt && Filepath.Substring(Filepath.Length - 5, 5) != "suoja")
+                if (Action == EnumerationTypes.JobAction.Decrypt && Filepath.Substring(Filepath.Length - 5, 5) != "suoja")
                 {
                     MessageBox.Show("Die ausgewählte Datei endet nicht auf .suoja und wird daher als unverschlüsselt angesehen.", "Suoja", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     rbtActionEncrypt.Checked = true;
                 }
-                if (Action == JobAction.Decrypt)
+                if (Action == EnumerationTypes.JobAction.Decrypt)
                 {
                     if (Filepath.Split('\\').Last().Split('.').Length == 2)
                     {
@@ -68,7 +55,7 @@ namespace Suoja
                 }
                 else
                 {
-                    if (Option == FilenameOptionDialog.Filenameoption.Keep)
+                    if (Option == EnumerationTypes.FileNameOption.Keep)
                     {
                         lblOriginal.Text = Filepath.Split('\\').Last() + ".suoja";
                     }
@@ -86,15 +73,15 @@ namespace Suoja
         {
             if (rbtActionEncrypt.Checked)
             {
-                Action = JobAction.Encrypt;
-                rbtKeyNew.Enabled = lblKeyNewDesc.Enabled = btnChooseFilenameoption.Enabled = !KeyFileOnly;
+                Action = EnumerationTypes.JobAction.Encrypt;
+                rbtKeyNew.Enabled = lblKeyNewDesc.Enabled = btnChooseFileNameOption.Enabled = !KeyFileOnly;
                 rbtKeyNew.Checked = true;
                 rbtKeyFromFile.Checked = KeyFileOnly;
             }
             else
             {
-                Action = JobAction.Decrypt;
-                rbtKeyNew.Enabled = lblKeyNewDesc.Enabled = btnChooseFilenameoption.Enabled = false;
+                Action = EnumerationTypes.JobAction.Decrypt;
+                rbtKeyNew.Enabled = lblKeyNewDesc.Enabled = btnChooseFileNameOption.Enabled = false;
                 rbtKeyFromFile.Checked = true;
                 if (Filepath != null && Filepath.Length > 7)
                 {
@@ -107,7 +94,7 @@ namespace Suoja
             }
             if (Filepath != null && !KeyFileOnly)
             {
-                if (Action == JobAction.Decrypt)
+                if (Action == EnumerationTypes.JobAction.Decrypt)
                 {
                     if (Filepath.Split('\\').Last().Split('.').Length == 2)
                     {
@@ -120,7 +107,7 @@ namespace Suoja
                 }
                 else
                 {
-                    if (Option == FilenameOptionDialog.Filenameoption.Keep)
+                    if (Option == EnumerationTypes.FileNameOption.Keep)
                     {
                         lblOriginal.Text = Filepath.Split('\\').Last() + ".suoja";
                     }
@@ -137,11 +124,11 @@ namespace Suoja
         {
             if (rbtKeyFromFile.Checked)
             {
-                Source = KeySource.File;
+                Source = EnumerationTypes.KeySource.File;
             }
             else
             {
-                Source = KeySource.New;
+                Source = EnumerationTypes.KeySource.New;
             }
             Keypath = null;
             btnChooseKey.Enabled = rbtKeyFromFile.Checked;
@@ -199,7 +186,7 @@ namespace Suoja
             btnAdd.Enabled = (Filepath != null && Keypath != null);
         }
 
-        private void btnChooseFilenameoption_Click(object sender, EventArgs e)
+        private void btnChooseFileNameOption_Click(object sender, EventArgs e)
         {
             FilenameOptionDialog fod = new FilenameOptionDialog();
             fod.Option = Option;
@@ -208,7 +195,7 @@ namespace Suoja
                 Option = fod.Option;
                 if (Filepath != null)
                 {
-                    if (Option == FilenameOptionDialog.Filenameoption.Keep)
+                    if (Option == EnumerationTypes.FileNameOption.Keep)
                     {
                         lblOriginal.Text = Filepath.Split('\\').Last() + ".suoja";
                     }
@@ -226,7 +213,7 @@ namespace Suoja
             if (Filepath != null)
             {
                 tbxFilepath.Text = Filepath;
-                if (Action == JobAction.Decrypt)
+                if (Action == EnumerationTypes.JobAction.Decrypt)
                 {
                     if (Filepath.Split('\\').Last().Split('.').Length == 2)
                     {
@@ -239,7 +226,7 @@ namespace Suoja
                 }
                 else
                 {
-                    if (Option == FilenameOptionDialog.Filenameoption.Keep)
+                    if (Option == EnumerationTypes.FileNameOption.Keep)
                     {
                         lblOriginal.Text = Filepath.Split('\\').Last() + ".suoja";
                     }

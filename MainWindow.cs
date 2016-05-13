@@ -44,17 +44,17 @@ namespace Suoja
             ajd.Dispose(); //Cleanup
         }
 
-        private void addJob(string filepath, string keypath, AddJobDialog.JobAction action, AddJobDialog.KeySource source, FilenameOptionDialog.Filenameoption option)
+        private void addJob(string filepath, string keypath, EnumerationTypes.JobAction action, EnumerationTypes.KeySource source, EnumerationTypes.FileNameOption option)
         {
             SuojaJob job = new SuojaJob(filepath, keypath, action, source, option); //Initialize a new job
-            job.Status = SuojaJob.JobStatus.Queued;
+            job.Status = EnumerationTypes.JobStatus.Queued;
             Jobs.Add(job); //Add the job
             ListViewItem lvi = new ListViewItem(); //Create a new ListViewItem
             lvi.Group = lvwJobs.Groups[0]; //Group set to "waiting"
             lvi.Text = filepath; //Display the filepath
-            if (action == AddJobDialog.JobAction.Decrypt) { lvi.SubItems.Add("Entschlüsseln"); } else { lvi.SubItems.Add("Verschlüsseln"); } //Display either "Encrypt" or "Decrypt"
-            if (source == AddJobDialog.KeySource.File) { lvi.SubItems.Add(keypath); } else { lvi.SubItems.Add("Neu"); } //Display either the Keyfilepath or "New"
-            if (option == FilenameOptionDialog.Filenameoption.Keep) { lvi.SubItems.Add("Unverändert"); } else { lvi.SubItems.Add("Versteckt"); } //Display either "Keep" or "Encode"
+            if (action == EnumerationTypes.JobAction.Decrypt) { lvi.SubItems.Add("Entschlüsseln"); } else { lvi.SubItems.Add("Verschlüsseln"); } //Display either "Encrypt" or "Decrypt"
+            if (source == EnumerationTypes.KeySource.File) { lvi.SubItems.Add(keypath); } else { lvi.SubItems.Add("Neu"); } //Display either the Keyfilepath or "New"
+            if (option == EnumerationTypes.FileNameOption.Keep) { lvi.SubItems.Add("Unverändert"); } else { lvi.SubItems.Add("Versteckt"); } //Display either "Keep" or "Encode"
             lvwJobs.Items.Add(lvi); //Add the ListViewItem
             btnStartAll.Enabled = true; //Enable the "Start All"-button
         }
@@ -98,12 +98,12 @@ namespace Suoja
                         if (startJob(job)) //If the job went flawlessly
                         {
                             lvi.Group = lvwJobs.Groups[1]; //Set the group to "Finished"
-                            job.Status = SuojaJob.JobStatus.Finished;
+                            job.Status = EnumerationTypes.JobStatus.Finished;
                         }
                         else
                         {
                             lvi.Group = lvwJobs.Groups[2]; //Otherwise to "Error"
-                            job.Status = SuojaJob.JobStatus.Failed;
+                            job.Status = EnumerationTypes.JobStatus.Failed;
                         }
                     }
                 }
@@ -121,10 +121,10 @@ namespace Suoja
                 return true;
             }
 
-            if (job.Action == AddJobDialog.JobAction.Encrypt) //If the job is an Encryption
+            if (job.Action == EnumerationTypes.JobAction.Encrypt) //If the job is an Encryption
             {
                 string outputPath;
-                if (job.Source == AddJobDialog.KeySource.File) //If the job uses an existing Key and IV
+                if (job.Source == EnumerationTypes.KeySource.File) //If the job uses an existing Key and IV
                 {
                     CryptographicData = JsonConvert.DeserializeObject<SuojaCryptographicData>(File.ReadAllText(job.Keypath)); //Load the corresponding Key and IV
                     Provider = new SuojaProvider(CryptographicData); //Initialize the Provider with the Key and IV
@@ -135,7 +135,7 @@ namespace Suoja
                     CryptographicData = Provider.GetCryptographicData(); //Export the Key and IV
                     File.WriteAllText(job.Keypath, JsonConvert.SerializeObject(CryptographicData, Formatting.Indented)); //Save
                 }
-                if (job.Option == FilenameOptionDialog.Filenameoption.Keep) //If the Filenameoption is set to "Keep"
+                if (job.Option == EnumerationTypes.FileNameOption.Keep) //If the Filenameoption is set to "Keep"
                 {
                     outputPath = job.Filepath + ".suoja"; //Just add ".suoja"
                 }
@@ -158,11 +158,11 @@ namespace Suoja
 
                 if (result)
                 {
-                    job.Status = SuojaJob.JobStatus.Finished;
+                    job.Status = EnumerationTypes.JobStatus.Finished;
                 }
                 else
                 {
-                    job.Status = SuojaJob.JobStatus.Failed;
+                    job.Status = EnumerationTypes.JobStatus.Failed;
                 }
                 jrp.Invoke(new EventHandler(delegate { jrp.Close(); }));
                 job.Done = result; //Set the result
@@ -194,11 +194,11 @@ namespace Suoja
                 File.Delete(job.Filepath + ".hmac");
                 if (result)
                 {
-                    job.Status = SuojaJob.JobStatus.Finished;
+                    job.Status = EnumerationTypes.JobStatus.Finished;
                 }
                 else
                 {
-                    job.Status = SuojaJob.JobStatus.Failed;
+                    job.Status = EnumerationTypes.JobStatus.Failed;
                 }
 
                 jrp.Invoke(new EventHandler(delegate { jrp.Close(); }));
@@ -246,7 +246,7 @@ namespace Suoja
         private void lvwJobs_DragDrop(object sender, DragEventArgs e)
         {
             DataObject data = (DataObject)e.Data; //Get the submitted data
-            DragDropDialog.HandleMethod Method = DragDropDialog.HandleMethod.Individual; //Define Individual as standard
+            EnumerationTypes.HandleMethod Method = EnumerationTypes.HandleMethod.Individual; //Define Individual as standard
             if (data.GetFileDropList().Count > 1) //If multiple files are dropped
             {
                 DragDropDialog ddd = new DragDropDialog(); //Show a new DragDropDialog
@@ -256,7 +256,7 @@ namespace Suoja
                 }
                 ddd.Dispose(); //Cleanup
 
-                if (Method == DragDropDialog.HandleMethod.Compress) //If the user chose to compress the files
+                if (Method == EnumerationTypes.HandleMethod.Compress) //If the user chose to compress the files
                 {
                     string[] files = new string[data.GetFileDropList().Count]; //Copy the filepaths to a string array
                     data.GetFileDropList().CopyTo(files, 0);
@@ -286,7 +286,7 @@ namespace Suoja
                     }
                     sfd.Dispose(); //Cleanup
                 }
-                else if (Method == DragDropDialog.HandleMethod.Individual) //If the user chose to handle each file individually
+                else if (Method == EnumerationTypes.HandleMethod.Individual) //If the user chose to handle each file individually
                 {
                     foreach (string filepath in data.GetFileDropList()) //For every dropped file
                     {
@@ -310,7 +310,7 @@ namespace Suoja
                         SuojaJob job = new SuojaJob(ajd2.Filepath, ajd2.Keypath, ajd2.Action, ajd2.Source, ajd2.Option); //Create the template job
                         foreach (string filepath in data.GetFileDropList()) //For every dropped file
                         {
-                            if (filepath.Substring(filepath.Length - 5, 5) != "suoja" && ajd2.Action == AddJobDialog.JobAction.Decrypt) //If the user want's to decrypt files but the actual file isn't considered encrypted
+                            if (filepath.Substring(filepath.Length - 5, 5) != "suoja" && ajd2.Action == EnumerationTypes.JobAction.Decrypt) //If the user want's to decrypt files but the actual file isn't considered encrypted
                             {
                                 MessageBox.Show("Die Datei \"" + filepath.Split('\\').Last() + "\" endet nicht auf .suoja und wird ignoriert.", "Suoja", MessageBoxButtons.OK, MessageBoxIcon.Warning); //Ignore the file and inform the user
                             }
@@ -356,7 +356,7 @@ namespace Suoja
                         jd.Status = job.Status;
                         jd.Action = job.Action;
                         string path = job.Filepath.Substring(0, job.Filepath.Length - job.Filepath.Split('\\').Last().Length); //Otherwise split the Filepath into path and filename
-                        if (job.Action == AddJobDialog.JobAction.Decrypt)
+                        if (job.Action == EnumerationTypes.JobAction.Decrypt)
                         {
                             if (job.Filepath.Split('\\').Last().Split('.').Length == 2) //If the filename contains only 1 dot (.) it is a Base64-encoded string
                             {
@@ -369,7 +369,7 @@ namespace Suoja
                         }
                         else
                         {
-                            if (job.Option == FilenameOptionDialog.Filenameoption.Keep) //If the Filenameoption is set to "Keep"
+                            if (job.Option == EnumerationTypes.FileNameOption.Keep) //If the Filenameoption is set to "Keep"
                             {
                                 jd.OutputFilepath = job.Filepath + ".suoja"; //Just add ".suoja"
                             }
@@ -391,7 +391,7 @@ namespace Suoja
                                 lvwJobs.SelectedItems[0].Group = lvwJobs.Groups[2]; //Otherwise to "Error"
                             }
                         }
-                        jd.Dispose();
+                        jd.Dispose(); //Cleanup
                     }
                 }
             }

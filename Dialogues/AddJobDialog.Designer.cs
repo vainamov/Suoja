@@ -34,7 +34,7 @@
             this.rbtActionDecrypt = new System.Windows.Forms.RadioButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.btnChooseFilenameoption = new System.Windows.Forms.Button();
+            this.btnChooseFileNameOption = new System.Windows.Forms.Button();
             this.lblOriginal = new System.Windows.Forms.Label();
             this.btnChooseFile = new System.Windows.Forms.Button();
             this.tbxFilepath = new System.Windows.Forms.TextBox();
@@ -106,7 +106,7 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.btnChooseFilenameoption);
+            this.groupBox2.Controls.Add(this.btnChooseFileNameOption);
             this.groupBox2.Controls.Add(this.lblOriginal);
             this.groupBox2.Controls.Add(this.btnChooseFile);
             this.groupBox2.Controls.Add(this.tbxFilepath);
@@ -121,14 +121,14 @@
             // 
             // btnChooseFilenameoption
             // 
-            this.btnChooseFilenameoption.ForeColor = System.Drawing.Color.Black;
-            this.btnChooseFilenameoption.Location = new System.Drawing.Point(213, 58);
-            this.btnChooseFilenameoption.Name = "btnChooseFilenameoption";
-            this.btnChooseFilenameoption.Size = new System.Drawing.Size(141, 25);
-            this.btnChooseFilenameoption.TabIndex = 13;
-            this.btnChooseFilenameoption.Text = "Dateinamenoptionen...";
-            this.btnChooseFilenameoption.UseVisualStyleBackColor = true;
-            this.btnChooseFilenameoption.Click += new System.EventHandler(this.btnChooseFilenameoption_Click);
+            this.btnChooseFileNameOption.ForeColor = System.Drawing.Color.Black;
+            this.btnChooseFileNameOption.Location = new System.Drawing.Point(213, 58);
+            this.btnChooseFileNameOption.Name = "btnChooseFileNameOption";
+            this.btnChooseFileNameOption.Size = new System.Drawing.Size(141, 25);
+            this.btnChooseFileNameOption.TabIndex = 13;
+            this.btnChooseFileNameOption.Text = "Dateinamenoptionen...";
+            this.btnChooseFileNameOption.UseVisualStyleBackColor = true;
+            this.btnChooseFileNameOption.Click += new System.EventHandler(this.btnChooseFileNameOption_Click);
             // 
             // lblOriginal
             // 
@@ -350,6 +350,6 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button btnChooseKeySave;
-        private System.Windows.Forms.Button btnChooseFilenameoption;
+        private System.Windows.Forms.Button btnChooseFileNameOption;
     }
 }

@@ -71,6 +71,7 @@
     <Compile Include="DragDropDialog.Designer.cs">
       <DependentUpon>DragDropDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="EnumerationTypes.cs" />
     <Compile Include="FilenameOptionDialog.cs">
       <SubType>Form</SubType>
     </Compile>

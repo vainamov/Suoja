@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Suoja
@@ -16,9 +11,9 @@ namespace Suoja
         public string OriginalFilepath { get; set; }
         public string OutputFilepath { get; set; }
         public string KeyFilepath { get; set; }
-        public SuojaJob.JobStatus Status { get; set; }
-        public AddJobDialog.JobAction Action { get; set; }
-        public FilenameOptionDialog.Filenameoption Option { get; set; }
+        public EnumerationTypes.JobStatus Status { get; set; }
+        public EnumerationTypes.JobAction Action { get; set; }
+        public EnumerationTypes.FileNameOption Option { get; set; }
         public string Message { get; set; }
 
         public JobDetails()
@@ -33,19 +28,19 @@ namespace Suoja
             lblKey.Text = KeyFilepath.Split('\\').Last();
             switch (Status)
             {
-                case SuojaJob.JobStatus.Queued:
+                case EnumerationTypes.JobStatus.Queued:
                     lblStatus.Text = "In Wartschlange";
                     btnStart.Enabled = true;
                     break;
-                case SuojaJob.JobStatus.Finished:
+                case EnumerationTypes.JobStatus.Finished:
                     lblStatus.Text = "Abgeschlossen";
                     btnShowOutput.Enabled = true;
                     break;
-                case SuojaJob.JobStatus.Failed:
+                case EnumerationTypes.JobStatus.Failed:
                     lblStatus.Text = "Fehlgeschlagen";
                     break;
             }
-            if (Action == AddJobDialog.JobAction.Encrypt)
+            if (Action == EnumerationTypes.JobAction.Encrypt)
             {
                 lblAction.Text = "Verschlüsseln";
             }
@@ -53,7 +48,7 @@ namespace Suoja
             {
                 lblAction.Text = "Entschlüsseln";
             }
-            if (Option == FilenameOptionDialog.Filenameoption.Keep)
+            if (Option == EnumerationTypes.FileNameOption.Keep)
             {
                 lblOption.Text = "Unverändert";
             }

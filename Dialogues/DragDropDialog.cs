@@ -14,63 +14,39 @@ namespace Suoja
         public DragDropDialog()
         {
             InitializeComponent();
-            Method = HandleMethod.Individual;
+            Method = EnumerationTypes.HandleMethod.Individual;
         }
 
-        public enum HandleMethod
-        {
-            Compress,
-            Individual,
-            Equal
-        }
-
-        public HandleMethod Method { get; set; }
+        public EnumerationTypes.HandleMethod Method { get; set; }
 
         private void rbtCompress_CheckedChanged(object sender, EventArgs e)
         {
-            if (rbtCompress.Checked)
-            {
-                Method = HandleMethod.Compress;
-            }
-            else if (rbtIndividual.Checked)
-            {
-                Method = HandleMethod.Individual;
-            }
-            else if (rbtEqual.Checked)
-            {
-                Method = HandleMethod.Equal;
-            }
+            setHandleMethod();
         }
 
         private void rbtIndividual_CheckedChanged(object sender, EventArgs e)
         {
-            if (rbtCompress.Checked)
-            {
-                Method = HandleMethod.Compress;
-            }
-            else if (rbtIndividual.Checked)
-            {
-                Method = HandleMethod.Individual;
-            }
-            else if (rbtEqual.Checked)
-            {
-                Method = HandleMethod.Equal;
-            }
+            setHandleMethod();
         }
 
         private void rbtEqual_CheckedChanged(object sender, EventArgs e)
         {
+            setHandleMethod();
+        }
+
+        private void setHandleMethod()
+        {
             if (rbtCompress.Checked)
             {
-                Method = HandleMethod.Compress;
+                Method = EnumerationTypes.HandleMethod.Compress;
             }
             else if (rbtIndividual.Checked)
             {
-                Method = HandleMethod.Individual;
+                Method = EnumerationTypes.HandleMethod.Individual;
             }
             else if (rbtEqual.Checked)
             {
-                Method = HandleMethod.Equal;
+                Method = EnumerationTypes.HandleMethod.Equal;
             }
         }
     }

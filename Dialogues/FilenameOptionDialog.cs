@@ -5,14 +5,7 @@ namespace Suoja
 {
     public partial class FilenameOptionDialog : Form
     {
-
-        public enum Filenameoption
-        {
-            Keep,
-            Encode
-        }
-
-        public Filenameoption Option { get; set; }
+        public EnumerationTypes.FileNameOption Option { get; set; }
 
         public FilenameOptionDialog()
         {
@@ -23,17 +16,17 @@ namespace Suoja
         {
             if (rbtKeep.Checked)
             {
-                Option = Filenameoption.Keep;
+                Option = EnumerationTypes.FileNameOption.Keep;
             }
             else
             {
-                Option = Filenameoption.Encode;
+                Option = EnumerationTypes.FileNameOption.Encode;
             }
         }
 
         private void FilenameOptionDialog_Shown(object sender, EventArgs e)
         {
-            if (Option == Filenameoption.Encode)
+            if (Option == EnumerationTypes.FileNameOption.Encode)
             {
                 rbtEncode.Checked = true;
             }
