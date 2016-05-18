@@ -30,7 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AboutDialog));
             this.panel1 = new System.Windows.Forms.Panel();
-            this.btnAdd = new System.Windows.Forms.Button();
+            this.btnClose = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -45,6 +45,8 @@
             this.label7 = new System.Windows.Forms.Label();
             this.llblZip = new System.Windows.Forms.LinkLabel();
             this.label8 = new System.Windows.Forms.Label();
+            this.btnRemoveDocumentPopup = new System.Windows.Forms.Button();
+            this.label9 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -52,26 +54,26 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.panel1.Controls.Add(this.btnAdd);
+            this.panel1.Controls.Add(this.btnClose);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 443);
+            this.panel1.Location = new System.Drawing.Point(0, 517);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(388, 44);
             this.panel1.TabIndex = 17;
             // 
-            // btnAdd
+            // btnClose
             // 
-            this.btnAdd.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnAdd.ForeColor = System.Drawing.Color.Black;
-            this.btnAdd.Image = ((System.Drawing.Image)(resources.GetObject("btnAdd.Image")));
-            this.btnAdd.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnAdd.Location = new System.Drawing.Point(255, 10);
-            this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(120, 25);
-            this.btnAdd.TabIndex = 13;
-            this.btnAdd.Text = "Schließen";
-            this.btnAdd.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnClose.ForeColor = System.Drawing.Color.Black;
+            this.btnClose.Image = ((System.Drawing.Image)(resources.GetObject("btnClose.Image")));
+            this.btnClose.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnClose.Location = new System.Drawing.Point(255, 10);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.Size = new System.Drawing.Size(120, 25);
+            this.btnClose.TabIndex = 13;
+            this.btnClose.Text = "Schließen";
+            this.btnClose.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btnClose.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
@@ -246,13 +248,39 @@
             this.label8.TabIndex = 31;
             this.label8.Text = "DotNetZip (Ionic.Zip)";
             // 
+            // btnRemoveDocumentPopup
+            // 
+            this.btnRemoveDocumentPopup.ForeColor = System.Drawing.Color.Black;
+            this.btnRemoveDocumentPopup.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnRemoveDocumentPopup.Location = new System.Drawing.Point(16, 476);
+            this.btnRemoveDocumentPopup.Name = "btnRemoveDocumentPopup";
+            this.btnRemoveDocumentPopup.Size = new System.Drawing.Size(120, 25);
+            this.btnRemoveDocumentPopup.TabIndex = 14;
+            this.btnRemoveDocumentPopup.Text = "Hinweis entfernen";
+            this.btnRemoveDocumentPopup.UseVisualStyleBackColor = true;
+            this.btnRemoveDocumentPopup.Click += new System.EventHandler(this.btnRemoveDocumentPopup_Click);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label9.ForeColor = System.Drawing.SystemColors.HotTrack;
+            this.label9.Location = new System.Drawing.Point(13, 445);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(199, 21);
+            this.label9.TabIndex = 33;
+            this.label9.Text = "Office-Dokumente-Hinweis";
+            // 
             // AboutDialog
             // 
+            this.AcceptButton = this.btnClose;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.CancelButton = this.btnAdd;
-            this.ClientSize = new System.Drawing.Size(388, 487);
+            this.CancelButton = this.btnClose;
+            this.ClientSize = new System.Drawing.Size(388, 561);
+            this.Controls.Add(this.btnRemoveDocumentPopup);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.llblZip);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
@@ -287,7 +315,7 @@
         #endregion
 
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.PictureBox pictureBox1;
@@ -302,5 +330,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.LinkLabel llblZip;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button btnRemoveDocumentPopup;
+        private System.Windows.Forms.Label label9;
     }
 }

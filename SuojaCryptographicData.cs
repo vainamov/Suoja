@@ -2,29 +2,29 @@
 {
     class SuojaCryptographicData
     {
-        private byte[] _aesKey;
-        public byte[] AesKey
+        private byte[] _key;
+        public byte[] Key
         {
             get
             {
-                return _aesKey;
+                return _key;
             }
             set
             {
-                _aesKey = value;
+                _key = value;
             }
         }
 
-        private byte[] _aesIV;
-        public byte[] AesIV
+        private byte[] _IV;
+        public byte[] IV
         {
             get
             {
-                return _aesIV;
+                return _IV;
             }
             set
             {
-                _aesIV = value;
+                _IV = value;
             }
         }
     }

@@ -56,7 +56,14 @@ namespace Suoja
             {
                 lblOption.Text = "Kodiert";
             }
-            tbxInformation.Text = Message;
+            if (Message != null)
+            {
+                tbxInformation.Text = Message.Replace("\n", Environment.NewLine);
+            }
+            else
+            {
+                tbxInformation.Text = "";
+            }
         }
 
         private void btnShowOriginal_Click(object sender, EventArgs e)

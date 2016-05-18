@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace Suoja
 {
@@ -72,8 +73,8 @@ namespace Suoja
             AesProvider.BlockSize = 128; //Set BlockSize
             AesProvider.Padding = PaddingMode.Zeros; //Set Padding
             AesProvider.Mode = CipherMode.CBC; //Set Mode
-            AesIV = data.AesIV; //Import existing Key
-            AesKey = data.AesKey; //Import existing IV
+            AesIV = data.IV; //Import existing Key
+            AesKey = data.Key; //Import existing IV
         }
 
         /// <summary>
@@ -83,8 +84,8 @@ namespace Suoja
         public SuojaCryptographicData GetCryptographicData()
         {
             SuojaCryptographicData data = new SuojaCryptographicData(); //Create new data storage
-            data.AesIV = AesIV; //Export IV
-            data.AesKey = AesKey; //Export Key
+            data.IV = AesIV; //Export IV
+            data.Key = AesKey; //Export Key
             return data;
         }
 
@@ -94,14 +95,14 @@ namespace Suoja
         /// <param name="filepath">Path of the original file.</param>
         /// <param name="outputPath">Path of the place, where to save the encrypted file.</param>
         /// <returns></returns>
-        public bool Encrypt(string filepath, string outputPath)
+        public EnumerationTypes.JobResult Encrypt(string filepath, string outputPath, string keyPath)
         {
             try
             {
-                FileStream inputStream = new FileStream(filepath, FileMode.Open);
-                FileStream outputStream = new FileStream(outputPath + ".data", FileMode.Create);
-                ICryptoTransform ict = AesProvider.CreateEncryptor();
-                CryptoStream stream = new CryptoStream(outputStream, ict, CryptoStreamMode.Write);
+                FileStream inputStream = new FileStream(filepath, FileMode.Open); //Input stream that reads the original file
+                FileStream outputStream = new FileStream(PathHelper.GetDirectory(filepath) + ".data", FileMode.Create); //Output stream that writes the encrypted file
+                ICryptoTransform ict = AesProvider.CreateEncryptor(); //Contains the data for the encryption
+                CryptoStream stream = new CryptoStream(outputStream, ict, CryptoStreamMode.Write); //Stream used for encryption
 
                 int data;
                 while ((data = inputStream.ReadByte()) != -1) //While there is data left
@@ -112,15 +113,16 @@ namespace Suoja
                 outputStream.Dispose(); //Cleanup
                 ict.Dispose(); //Cleanup
 
-                CreateHMACSignature(outputPath + ".data", outputPath); //Create a signature to validate the file
-                string[] filenames = { outputPath + ".data", outputPath + ".hmac" };
-                SuojaCompression.Compress(filenames, outputPath); //Store the signature in the file
+                CreateKeyHash(keyPath, PathHelper.GetDirectory(keyPath) + ".sha256"); //Create a signature to validate the key 
+                CreateHMACSignature(PathHelper.GetDirectory(filepath) + ".data", PathHelper.GetDirectory(filepath) + ".hmac"); //Create a signature to validate the file
+                string[] filenames = { PathHelper.GetDirectory(filepath) + ".data", PathHelper.GetDirectory(filepath) + ".hmac", PathHelper.GetDirectory(keyPath) + ".sha256" }; //Combine data and signatures
+                SuojaCompression.Compress(filenames, outputPath); //Store the all contents in the file
 
-                return true; //Everything went fine
+                return EnumerationTypes.JobResult.Fine; //Everything went fine
             }
             catch
             {
-                return false; //Something went wrong
+                return EnumerationTypes.JobResult.Unknown; //Something went wrong
             }
         }
 
@@ -130,19 +132,22 @@ namespace Suoja
         /// <param name="filepath">Path of the encrypted file.</param>
         /// <param name="outputPath">Path of the place, where to save the decrypted file.</param>
         /// <returns></returns>
-        public bool Decrypt(string filepath, string outputPath)
+        public EnumerationTypes.JobResult Decrypt(string filepath, string outputPath, string keyPath)
         {
-            //try
-            //{
-                SuojaCompression.Extract(filepath, filepath.Remove(filepath.Length - filepath.Split('\\').Last().Length, filepath.Split('\\').Last().Length));
-
-                if (ValidateHMACSignature(filepath + ".data", filepath + ".hmac")) //Check if the signature is valid
+            try
+            {
+                SuojaCompression.Extract(filepath, PathHelper.GetDirectory(filepath));
+                if (!ValidateKeyHash(keyPath, PathHelper.GetDirectory(filepath) + ".sha256"))
+                {
+                    return EnumerationTypes.JobResult.BadKey; //Something went wrong (eg. wrong Key/IV)
+                }
+                if (ValidateHMACSignature(PathHelper.GetDirectory(filepath) + ".data", PathHelper.GetDirectory(filepath) + ".hmac")) //Check if the signature is valid
                 {
 
-                    FileStream inputStream = new FileStream(filepath + ".data", FileMode.Open);
-                    FileStream outputStream = new FileStream(outputPath, FileMode.Create);
-                    ICryptoTransform ict = AesProvider.CreateDecryptor();
-                    CryptoStream stream = new CryptoStream(inputStream, ict, CryptoStreamMode.Read);
+                    FileStream inputStream = new FileStream(PathHelper.GetDirectory(filepath) + ".data", FileMode.Open); //Input stream that reads the original file
+                    FileStream outputStream = new FileStream(outputPath, FileMode.Create); //Output stream that writes the decrypted file
+                    ICryptoTransform ict = AesProvider.CreateDecryptor(); //Contains the data for the decryption
+                    CryptoStream stream = new CryptoStream(inputStream, ict, CryptoStreamMode.Read); //Stream used for decryption
 
                     int data;
                     while ((data = stream.ReadByte()) != -1) //While there is data left
@@ -153,20 +158,21 @@ namespace Suoja
                     inputStream.Dispose(); //Cleanup
                     ict.Dispose(); //Cleanup
 
-                    return true; //Everything went fine 
+                    return EnumerationTypes.JobResult.Fine; //Everything went fine 
                 }
-                return false;
-            //}
-            //catch
-            //{
-            //    return false; //Something went wrong (eg. wrong Key/IV)
-            //}
+                return EnumerationTypes.JobResult.BadData; //Wrong signature
+            }
+            catch
+            {
+                return EnumerationTypes.JobResult.Unknown; //Something went wrong
+            }
         }
 
         private void CreateHMACSignature(string filepath, string outputPath)
         {
-            FileStream inputStream = new FileStream(filepath, FileMode.Open);
-            FileStream outputStream = new FileStream(outputPath + ".hmac", FileMode.Create);
+
+            FileStream inputStream = new FileStream(filepath, FileMode.Open); //Input stream that reads the encrypted file
+            FileStream outputStream = new FileStream(outputPath, FileMode.Create); //Output stream that writes the signature
             HMACProvider = new HMACSHA256(AesKey);
             byte[] hash = HMACProvider.ComputeHash(inputStream); //Create a signature
             outputStream.Write(hash, 0, hash.Length); //Save in file
@@ -176,21 +182,65 @@ namespace Suoja
             outputStream.Dispose(); //Cleanup
         }
 
-        private bool ValidateHMACSignature(string filepath, string signaturepath)
+        private bool ValidateHMACSignature(string filepath, string signaturePath)
         {
-            FileStream inputStream = new FileStream(filepath, FileMode.Open); 
-            FileStream signatureInputStream = new FileStream(signaturepath, FileMode.Open);
-            HMACProvider = new HMACSHA256(AesKey);
-            byte[] hash = HMACProvider.ComputeHash(inputStream); //Create a signature
-            byte[] signature = new byte[signatureInputStream.Length]; 
+            try
+            {
+                FileStream inputStream = new FileStream(filepath, FileMode.Open); //Input stream that reads the encrypted file
+                FileStream signatureInputStream = new FileStream(signaturePath, FileMode.Open); //Input stream that reads the signature
+                HMACProvider = new HMACSHA256(AesKey);
+                byte[] hash = HMACProvider.ComputeHash(inputStream); //Create a signature
+                byte[] signature = new byte[signatureInputStream.Length];  //Prepare a byte array for the existing signature
 
-            signatureInputStream.Read(signature, 0, signature.Length); //Load the files signature
+                signatureInputStream.Read(signature, 0, signature.Length); //Load the files signature
 
-            inputStream.Dispose(); //Cleanup
-            HMACProvider.Dispose(); //Cleanup
-            signatureInputStream.Dispose(); //Cleanup
-            return hash.SequenceEqual(signature); //Check if the signatures are valid
+                inputStream.Dispose(); //Cleanup
+                HMACProvider.Dispose(); //Cleanup
+                signatureInputStream.Dispose(); //Cleanup
+                return hash.SequenceEqual(signature); //Check if the signatures are valid
+            }
+            catch
+            {
+                return false;
+            }
         }
 
+        private void CreateKeyHash(string filepath, string outputPath)
+        {
+            FileStream inputStream = new FileStream(filepath, FileMode.Open); //Input stream that reads the encrypted file
+            FileStream outputStream = new FileStream(outputPath, FileMode.Create); //Output stream that writes the signature
+            using (SHA256 sha = SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(inputStream); //Create a signature
+                outputStream.Write(hash, 0, hash.Length); //Save in file
+            }
+            inputStream.Dispose(); //Cleanup
+            outputStream.Dispose(); //Cleanup
+        }
+
+        private bool ValidateKeyHash(string filepath, string signaturePath)
+        {
+            try
+            {
+                FileStream inputStream = new FileStream(filepath, FileMode.Open); //Input stream that reads the encrypted file
+                FileStream signatureInputStream = new FileStream(signaturePath, FileMode.Open); //Input stream that reads the signature
+                byte[] hash;
+                using (SHA256 sha = SHA256.Create())
+                {
+                    hash = sha.ComputeHash(inputStream); //Create a signature
+                }
+                byte[] signature = new byte[signatureInputStream.Length];  //Prepare a byte array for the existing signature
+
+                signatureInputStream.Read(signature, 0, signature.Length); //Load the files signature
+
+                inputStream.Dispose(); //Cleanup
+                signatureInputStream.Dispose(); //Cleanup
+                return hash.SequenceEqual(signature); //Check if the signatures are valid
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

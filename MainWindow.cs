@@ -13,9 +13,15 @@ namespace Suoja
     {
         private List<SuojaJob> Jobs = new List<SuojaJob>(); //List containing all jobs
 
+        private readonly string[] ErrorMessages = {
+            "Der Auftrag schlug fehl, da die zu entschlüsselnden Daten nicht mehr im Originalzustand sind.\n\nFehlercode: sja-2.0.12-0x000",
+            "Der Auftrag schlug fehl, da der zu verwendene Schlüssel nicht dem zur Verschlüsselung benutzten Schlüssel entspricht.\n\nFehlercode: sja-2.0.12-0x001",
+            "Der Auftrag scheiterte aus unbekannten Gründen.\n\nFehlercode: sja-2.0.12-unknwn"
+        };
+
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent(); //Import for the Designer
         }
 
         public MainWindow(string path)
@@ -47,7 +53,7 @@ namespace Suoja
         private void addJob(string filepath, string keypath, EnumerationTypes.JobAction action, EnumerationTypes.KeySource source, EnumerationTypes.FileNameOption option)
         {
             SuojaJob job = new SuojaJob(filepath, keypath, action, source, option); //Initialize a new job
-            job.Status = EnumerationTypes.JobStatus.Queued;
+            job.Status = EnumerationTypes.JobStatus.Queued; //Set it's status to queued
             Jobs.Add(job); //Add the job
             ListViewItem lvi = new ListViewItem(); //Create a new ListViewItem
             lvi.Group = lvwJobs.Groups[0]; //Group set to "waiting"
@@ -83,7 +89,7 @@ namespace Suoja
                 lvwJobs.Items.Remove(lvwJobs.SelectedItems[0]); //Remove the ListViewItem
             }
 
-            btnStartAll.Enabled = lvwJobs.Groups[0].Items.Count > 0;
+            btnStartAll.Enabled = lvwJobs.Groups[0].Items.Count > 0; //Enable the "Start All"-button if there is at least 1 job left in the queue
 
         }
 
@@ -98,12 +104,10 @@ namespace Suoja
                         if (startJob(job)) //If the job went flawlessly
                         {
                             lvi.Group = lvwJobs.Groups[1]; //Set the group to "Finished"
-                            job.Status = EnumerationTypes.JobStatus.Finished;
                         }
                         else
                         {
                             lvi.Group = lvwJobs.Groups[2]; //Otherwise to "Error"
-                            job.Status = EnumerationTypes.JobStatus.Failed;
                         }
                     }
                 }
@@ -141,69 +145,114 @@ namespace Suoja
                 }
                 else
                 {
-                    string path = job.Filepath.Substring(0, job.Filepath.Length - job.Filepath.Split('\\').Last().Length); //Otherwise split the Filepath into path and filename
-                    outputPath = Path.Combine(path, Convert.ToBase64String(Encoding.Default.GetBytes(job.Filepath.Split('\\').Last())) + ".suoja"); //Encode the filename in Base64, add ".suoja" and combine the new filename with the existing path
+                    outputPath = Path.Combine(job.BaseDirectory, Convert.ToBase64String(Encoding.Default.GetBytes(job.Filepath.Split('\\').Last())) + ".suoja"); //Encode the filename in Base64, add ".suoja" and combine the new filename with the existing path
                 }
                 job.OutputPath = outputPath; //Set the Output path
 
-                JobRunningPopup jrp = new JobRunningPopup();
-                new Thread(delegate ()
+                JobRunningPopup jrp = new JobRunningPopup(); //Initialize a new Popup
+                new Thread(delegate () //Open in a seperate thread to prevent the window from freezing
                 {
-                    jrp.ShowDialog();
-                }).Start();
+                    jrp.ShowDialog(); //Show the Popup
+                }).Start(); //Start the thread
 
-                bool result = Provider.Encrypt(job.Filepath, outputPath);
-                File.Delete(outputPath + ".data");
-                File.Delete(outputPath + ".hmac");
+                EnumerationTypes.JobResult result = Provider.Encrypt(job.Filepath, outputPath, job.Keypath); //Store the result
+                File.Delete(job.BaseDirectory + ".data"); //Delete the remaining temporary files
+                File.Delete(job.BaseDirectory + ".hmac"); //Delete the remaining temporary files
+                File.Delete(job.BaseDirectory + ".sha256"); //Delete the remaining temporary files
 
-                if (result)
+                job.Result = result; //Store the result
+                if (result == EnumerationTypes.JobResult.Fine)
                 {
-                    job.Status = EnumerationTypes.JobStatus.Finished;
+                    job.Status = EnumerationTypes.JobStatus.Finished; //Set the status to "Finished"
+                    job.Done = true; //Set the result
                 }
                 else
                 {
-                    job.Status = EnumerationTypes.JobStatus.Failed;
+                    job.Status = EnumerationTypes.JobStatus.Failed; //Set the status to "Failed"
+                    job.Done = false; //Set the result
                 }
-                jrp.Invoke(new EventHandler(delegate { jrp.Close(); }));
-                job.Done = result; //Set the result
-                return result; //Return it
+
+                /* Set Messages for the detailed view */
+                if (result == EnumerationTypes.JobResult.BadData)
+                {
+                    job.Message = ErrorMessages[0];
+                }
+                else if (result == EnumerationTypes.JobResult.BadKey)
+                {
+                    job.Message = ErrorMessages[1];
+                }
+                else if (result == EnumerationTypes.JobResult.Unknown)
+                {
+                    job.Message = ErrorMessages[2];
+                }
+
+                jrp.Invoke(new EventHandler(delegate { jrp.Close(); })); //Invoke (because of illegal cross-threading) the Popup to close
+
+                return job.Done; //Return it
             }
             else //The job is a Decryption
             {
                 string outputPath;
-                string path = job.Filepath.Substring(0, job.Filepath.Length - job.Filepath.Split('\\').Last().Length); //Split the Filepath intp path and filename
                 CryptographicData = JsonConvert.DeserializeObject<SuojaCryptographicData>(File.ReadAllText(job.Keypath)); //Load the Key and IV
                 Provider = new SuojaProvider(CryptographicData); //Initialize the Provider with the Key and IV
-                if (job.Filepath.Split('\\').Last().Split('.').Length == 2) //If the filename contains only 1 dot (.) it is a Base64-encoded string
+                if (PathHelper.GetFilename(job.Filepath).Split('.').Length == 2) //If the filename contains only 1 dot (.) it's a Base64-encoded string
                 {
-                    outputPath = Path.Combine(path, Encoding.Default.GetString(Convert.FromBase64String(job.Filepath.Split('\\').Last().Remove(job.Filepath.Split('\\').Last().Length - 6, 6)))); //Therefore remove the ".suoja", decode the filename from Base64 and combine the result with the existing path
+                    outputPath = Path.Combine(job.BaseDirectory, Encoding.Default.GetString(Convert.FromBase64String(job.Filepath.Split('\\').Last().Remove(job.Filepath.Split('\\').Last().Length - 6, 6)))); //Therefore remove the ".suoja", decode the filename from Base64 and combine the result with the existing path
                 }
                 else
                 {
                     outputPath = job.Filepath.Remove(job.Filepath.Length - 6, 6); //Otherwise just remove the ".suoja"
                 }
 
-                JobRunningPopup jrp = new JobRunningPopup();
-                new Thread(delegate ()
+                JobRunningPopup jrp = new JobRunningPopup(); //Initialize a new Popup
+                new Thread(delegate () //Open in a seperate thread to prevent the window from freezing
                 {
-                    jrp.ShowDialog();
-                }).Start();
-                
-                bool result = Provider.Decrypt(job.Filepath, outputPath); //Store the jobs result
-                File.Delete(job.Filepath + ".data");
-                File.Delete(job.Filepath + ".hmac");
-                if (result)
+                    jrp.ShowDialog(); //Show the Popup
+                }).Start(); //Start the thread
+
+                EnumerationTypes.JobResult result = Provider.Decrypt(job.Filepath, outputPath, job.Keypath); //Store the result
+                File.Delete(job.BaseDirectory + ".data"); //Delete the remaining temporary files
+                File.Delete(job.BaseDirectory + ".hmac"); //Delete the remaining temporary files
+                File.Delete(job.BaseDirectory + ".sha256"); //Delete the remaining temporary files
+
+                job.Result = result; //Store the result
+                if (result == EnumerationTypes.JobResult.Fine)
                 {
-                    job.Status = EnumerationTypes.JobStatus.Finished;
+                    job.Status = EnumerationTypes.JobStatus.Finished; //Set the status to "Finished"
+                    job.Done = true; //Set the result
                 }
                 else
                 {
-                    job.Status = EnumerationTypes.JobStatus.Failed;
+                    job.Status = EnumerationTypes.JobStatus.Failed; //Set the status to "Failed"
+                    job.Done = false; //Set the result
                 }
 
-                jrp.Invoke(new EventHandler(delegate { jrp.Close(); }));
-                job.Done = result; //Set the result
-                return result; //Return it
+                /* Set Messages for the detailed view */
+                if (result == EnumerationTypes.JobResult.BadData)
+                {
+                    job.Message = ErrorMessages[0];
+                }
+                else if (result == EnumerationTypes.JobResult.BadKey)
+                {
+                    job.Message = ErrorMessages[1];
+                }
+                else if (result == EnumerationTypes.JobResult.Unknown)
+                {
+                    job.Message = ErrorMessages[2];
+                }
+
+                jrp.Invoke(new EventHandler(delegate { jrp.Close(); })); //Invoke (because of illegal cross-threading) the Popup to close
+
+                if (result == EnumerationTypes.JobResult.Fine && outputPath.Length > 4 && !File.Exists(Application.StartupPath + "\\.noDocumentAdvice"))
+                {
+                    if (outputPath.Substring(outputPath.Length - 5, 5) == ".docx" || outputPath.Substring(outputPath.Length - 5, 5) == ".pptx" || outputPath.Substring(outputPath.Length - 5, 5) == ".xlsx")
+                    {
+                        OfficeDocRepairInformationPopup odrip = new OfficeDocRepairInformationPopup();
+                        odrip.ShowDialog();
+                    }
+                }
+
+                return job.Done; //Return it
             }
         }
 
@@ -258,11 +307,11 @@ namespace Suoja
 
                 if (Method == EnumerationTypes.HandleMethod.Compress) //If the user chose to compress the files
                 {
-                    string[] files = new string[data.GetFileDropList().Count]; //Copy the filepaths to a string array
-                    data.GetFileDropList().CopyTo(files, 0);
+                    string[] files = new string[data.GetFileDropList().Count]; //Prepare a string array for the filepaths
+                    data.GetFileDropList().CopyTo(files, 0); //Copy the filepaths
                     SaveFileDialog sfd = new SaveFileDialog(); //Show a new SafeFileDialog
                     sfd.Filter = "Archiv (*.zip)|*.zip"; //Only allow ".zip" as extension
-                    sfd.Title = "Archiv speichern unter...";
+                    sfd.Title = "Archiv speichern unter..."; //Set the title
                     if (sfd.ShowDialog() == DialogResult.OK) //If the user hit "OK"
                     {
                         AddJobDialog ajd = new AddJobDialog(); //Show a new AddJobDialog
@@ -350,11 +399,11 @@ namespace Suoja
                 {
                     if (job.Filepath == lvwJobs.SelectedItems[0].Text)
                     {
-                        JobDetails jd = new JobDetails();
-                        jd.OriginalFilepath = job.Filepath;
-                        jd.KeyFilepath = job.Keypath;
-                        jd.Status = job.Status;
-                        jd.Action = job.Action;
+                        JobDetails jd = new JobDetails(); //Initialize a new JobDetailDialog
+                        jd.OriginalFilepath = job.Filepath; //Set the jobs params
+                        jd.KeyFilepath = job.Keypath; //Set the jobs params
+                        jd.Status = job.Status; //Set the jobs params
+                        jd.Action = job.Action; //Set the jobs params
                         string path = job.Filepath.Substring(0, job.Filepath.Length - job.Filepath.Split('\\').Last().Length); //Otherwise split the Filepath into path and filename
                         if (job.Action == EnumerationTypes.JobAction.Decrypt)
                         {
@@ -378,9 +427,9 @@ namespace Suoja
                                 jd.OutputFilepath = Path.Combine(path, Convert.ToBase64String(Encoding.Default.GetBytes(job.Filepath.Split('\\').Last())) + ".suoja"); //Encode the filename in Base64, add ".suoja" and combine the new filename with the existing path
                             }
                         }
-                        jd.Option = job.Option;
-                        jd.Message = job.Message;
-                        if (jd.ShowDialog() == DialogResult.OK)
+                        jd.Option = job.Option; //Set the jobs params
+                        jd.Message = job.Message; //Set the jobs params
+                        if (jd.ShowDialog() == DialogResult.OK) //If the user hit the "Start"-button
                         {
                             if (startJob(job)) //If the job went flawlessly
                             {

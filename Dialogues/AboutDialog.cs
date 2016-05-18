@@ -34,5 +34,11 @@ namespace Suoja
         {
             Process.Start("https://dotnetzip.codeplex.com/");
         }
+
+        private void btnRemoveDocumentPopup_Click(object sender, System.EventArgs e)
+        {
+            System.IO.File.WriteAllText(Application.StartupPath + "\\.noDocumentAdvice", "");
+            MessageBox.Show("Die Hinweise wurden entfernt. Wenn Sie die Hinweise wieder angezeigt bekommen möchten, löschen sie die \".noDocumentAdvice\"-Datei im Suoja-Verzeichnis.", "Hinweise entfernt", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
     }
 }

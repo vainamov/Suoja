@@ -1,4 +1,6 @@
-﻿namespace Suoja
+﻿using System.Linq;
+
+namespace Suoja
 {
     public class SuojaJob
     {
@@ -7,6 +9,16 @@
         /// Path of the Input file.
         /// </summary>
         public string Filepath { get; set; }
+        /// <summary>
+        /// Path of the Directory.
+        /// </summary>
+        public string BaseDirectory
+        {
+            get
+            {
+                return Filepath.Substring(0, Filepath.Length - Filepath.Split('\\').Last().Length);
+            }
+        }
         /// <summary>
         /// Path of the Key file.
         /// </summary>
@@ -35,6 +47,10 @@
         /// The status of this job.
         /// </summary>
         public EnumerationTypes.JobStatus Status { get; set; }
+        /// <summary>
+        /// The result of this job.
+        /// </summary>
+        public EnumerationTypes.JobResult Result { get; set; }
         /// <summary>
         /// Additional information to this job.
         /// </summary>

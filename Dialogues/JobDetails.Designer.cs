@@ -272,6 +272,7 @@
             this.tbxInformation.ReadOnly = true;
             this.tbxInformation.Size = new System.Drawing.Size(363, 117);
             this.tbxInformation.TabIndex = 40;
+            this.tbxInformation.Text = "Der Auftrag scheiterte aus unbekannten Gründen.\r\n\r\nFehlercode: sja-2.0.12-unknwn";
             // 
             // JobDetails
             // 
