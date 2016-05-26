@@ -243,16 +243,16 @@ namespace Suoja
 
                 jrp.Invoke(new EventHandler(delegate { jrp.Close(); })); //Invoke (because of illegal cross-threading) the Popup to close
 
-                if (result == EnumerationTypes.JobResult.Fine && outputPath.Length > 4 && !File.Exists(Application.StartupPath + "\\.noDocumentAdvice"))
+                if (result == EnumerationTypes.JobResult.Fine && outputPath.Length > 4 && !File.Exists(Application.StartupPath + "\\.noDocumentAdvice")) //If the user didn't chose to not see office document information popups
                 {
-                    if (outputPath.Substring(outputPath.Length - 5, 5) == ".docx" || outputPath.Substring(outputPath.Length - 5, 5) == ".pptx" || outputPath.Substring(outputPath.Length - 5, 5) == ".xlsx")
+                    if (outputPath.Substring(outputPath.Length - 5, 5) == ".docx" || outputPath.Substring(outputPath.Length - 5, 5) == ".pptx" || outputPath.Substring(outputPath.Length - 5, 5) == ".xlsx") //If the decrypted file is an office document
                     {
-                        OfficeDocRepairInformationPopup odrip = new OfficeDocRepairInformationPopup();
+                        OfficeDocRepairInformationPopup odrip = new OfficeDocRepairInformationPopup(); //Inform the user about possible error messages by office
                         odrip.ShowDialog();
                     }
                 }
 
-                return job.Done; //Return it
+                return job.Done; //Return the result
             }
         }
 

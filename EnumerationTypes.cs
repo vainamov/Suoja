@@ -33,13 +33,5 @@
             Finished,
             Failed
         }
-
-        public enum JobResult
-        {
-            Fine,
-            Unknown,
-            BadKey,
-            BadData
-        }
     }
 }

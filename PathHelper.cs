@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 
 namespace Suoja
 {
@@ -9,12 +6,12 @@ namespace Suoja
     {
         public static string GetDirectory(string filepath)
         {
-            return filepath.Substring(0, filepath.Length - filepath.Split('\\').Last().Length);
+            return filepath.Substring(0, filepath.Length - filepath.Split('\\').Last().Length); //Returns the Directory path of the given file
         }
 
         public static string GetFilename(string filepath)
         {
-            return filepath.Split('\\').Last();
+            return filepath.Split('\\').Last(); //Returns the filename itself without its path
         }
     }
 }

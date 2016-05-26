@@ -8,16 +8,16 @@ namespace Suoja
 
         public static void Compress(string[] content, string outputPath)
         {
-            using (ZipFile zip = new ZipFile())
+            using (ZipFile zip = new ZipFile()) //Create a new archive
             {
-                foreach (string file in content)
+                foreach (string file in content) 
                 {
-                    zip.AddFile(file, "/");
+                    zip.AddFile(file, "/"); //Add the files
                 }
-                FileStream stream = new FileStream(outputPath, FileMode.Create);
-                zip.Save(stream);
-                stream.Flush();
-                stream.Dispose();
+                FileStream stream = new FileStream(outputPath, FileMode.Create); //Initialize a new FileStream for saving the archive
+                zip.Save(stream); //Save
+                stream.Flush(); //Complete the process
+                stream.Dispose(); //Cleanup
             }
         }
 
@@ -27,7 +27,7 @@ namespace Suoja
             {
                 foreach (ZipEntry entry in zip)
                 {
-                    entry.Extract(outputPath, ExtractExistingFileAction.DoNotOverwrite);
+                    entry.Extract(outputPath, ExtractExistingFileAction.DoNotOverwrite); //Extract all files
                 }
             }
         }
