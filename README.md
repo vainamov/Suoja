@@ -31,6 +31,7 @@ There are two options to choose from on how to handle the filename.
 
 ### License and Redistributation Details
 Suoja and all it's components are licensed according to the [Creative Commons CC BY-NC-SA 4.0 License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+Suoja is part of the Festival-family ([@wearefestival](https://github.com/wearefestival)).
 
 ### Disclaimer
 ```
