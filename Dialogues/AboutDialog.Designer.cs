@@ -92,9 +92,9 @@
             this.label2.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.label2.Location = new System.Drawing.Point(12, 104);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(92, 19);
+            this.label2.Size = new System.Drawing.Size(128, 19);
             this.label2.TabIndex = 18;
-            this.label2.Text = "Fabian Krahtz";
+            this.label2.Text = "Fabian K. (vainamo)";
             // 
             // pictureBox1
             // 
@@ -220,7 +220,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(96, 19);
             this.label7.TabIndex = 30;
-            this.label7.Text = "Version 2.0.12";
+            this.label7.Text = "Version 2.0.16";
             // 
             // llblZip
             // 
